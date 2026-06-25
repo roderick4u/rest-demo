@@ -1,5 +1,6 @@
 package com.restproject.rest_demo.service.impl;
 
+import com.restproject.rest_demo.exception.CloudVendorNotFoundException;
 import com.restproject.rest_demo.model.CloudVendor;
 import com.restproject.rest_demo.repository.CloudVendorRepository;
 import com.restproject.rest_demo.service.CloudVendorService;
@@ -33,9 +34,11 @@ public class CloudVendorServiceImpl implements CloudVendorService {
         cloudVendorRepository.deleteById(cloudVendorId);
         return "Succesfully Deleted";
     }
-    // Finds the cloudvendor by their Id
+    // Finds the cloudvendor by their id
     @Override
     public CloudVendor getCloudVendor(String cloudVendorId) {
+        if(cloudVendorRepository.findById(cloudVendorId).isEmpty())
+            throw new CloudVendorNotFoundException("Requested Cloud Vendor does not exist");
         return cloudVendorRepository.findById(cloudVendorId).get();
     }
     // List of all the cloudvendors
