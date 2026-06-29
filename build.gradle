@@ -24,12 +24,18 @@ dependencies {
 	// Crucial dependency for JPA, Hibernate
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-	// MySQL Connector driver so Spring can talk to your database
+	// MySQL Connector driver so Spring can talk to the   database
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
-	// Testing dependencies
+	// H2 Database Driver for in-memory testing/prototyping
+	runtimeOnly 'com.h2database:h2'
+
+	// Testing dependencies (Includes Mockito, JUnit 5, AssertJ)
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// Required for @DataJpaTest in Spring Boot 4+
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+
 }
 
 tasks.named('test') {
