@@ -20,7 +20,8 @@ repositories {
 dependencies {
 	// Standard web dependency
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-
+	//@WebMvcTest
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	// Crucial dependency for JPA, Hibernate
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
