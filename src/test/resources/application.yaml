@@ -1,15 +1,14 @@
 spring:
   datasource:
-    url: jbdc:h2://mem:db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
     username: rest_user
     password: viajero123
     driver-class-name: org.h2.Driver
- #SQL dialect makes Hibernate generate better SQL for the chosen database
+
   jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-      show-sql: true
-
-  #JPA Settings
-    jpa.hibernate.ddl-auto: create-drop

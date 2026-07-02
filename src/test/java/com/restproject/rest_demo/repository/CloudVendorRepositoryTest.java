@@ -13,9 +13,9 @@ import static org.springframework.test.web.servlet.result.StatusResultMatchersEx
 
 @DataJpaTest
 
-public class CloudVendorRepositoryTest {
+public class  CloudVendorRepositoryTest {
 
-   @Autowired
+    @Autowired
     private CloudVendorRepository cloudVendorRepository;
     CloudVendor cloudVendor;
 
