@@ -1,6 +1,9 @@
 # REST Demo
 
-A Spring Boot REST API demo for managing cloud vendor records. The project shows a typical layered backend structure with a controller, service, repository, JPA entity, exception handling, and tests.
+A Spring Boot REST API demo with two examples:
+
+- A telecom-style notification gateway with API-key authentication, validation, rate limiting, retry behavior, notification history, and Swagger/OpenAPI.
+- A simple cloud vendor CRUD API used as the original layered REST example.
 
 ## Tech Stack
 
@@ -12,14 +15,18 @@ A Spring Boot REST API demo for managing cloud vendor records. The project shows
 - H2 in-memory database for tests
 - Gradle
 - JUnit 5 and Mockito
+- Springdoc OpenAPI
 
 ## Project Structure
 
 ```text
 src/main/java/com/restproject/rest_demo
+├── carrier         # Simulated carrier delivery
+├── client          # API clients and quota reset
 ├── controller      # REST endpoints
 ├── exception       # Custom exception and handler
 ├── model           # JPA entity
+├── notification    # Notification API, DTOs, service, logs, exceptions
 ├── repository      # Spring Data JPA repository
 ├── response        # Response wrapper helper
 └── service         # Service interface and implementation
@@ -31,7 +38,67 @@ Main flow:
 HTTP request -> Controller -> Service -> Repository -> Database
 ```
 
-## API Endpoints
+## Notification API
+
+Base path:
+
+```text
+/api/v1/notifications
+```
+
+Authentication:
+
+```text
+X-API-Key: demo-api-key
+```
+
+The demo client is seeded from `demo.client.api-key` in `application.yaml`. The key is fixed for local demos and is not logged at startup.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/api/v1/notifications` | Send a notification |
+| `GET` | `/api/v1/notifications/{id}` | Get one notification log |
+| `GET` | `/api/v1/notifications/client/{clientId}?page=0&size=20` | Get paginated notification history for a client |
+
+Send a notification:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/notifications \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: demo-api-key" \
+  -d '{
+    "recipient": "+15551234567",
+    "message": "Your verification code is 123456",
+    "type": "CRITICAL"
+  }'
+```
+
+Message types:
+
+```text
+CRITICAL, MARKETING, TRANSACTIONAL
+```
+
+Behavior:
+
+- Invalid requests return `400 Bad Request`.
+- Unknown API keys return `404 Not Found`.
+- Rate-limited clients return `429 Too Many Requests`.
+- Accepted requests consume quota before carrier delivery.
+- `CRITICAL` messages retry up to 3 carrier attempts.
+- `MARKETING` and `TRANSACTIONAL` messages attempt delivery once.
+- Successful deliveries store the carrier reference in the notification log.
+- Daily message counts reset at midnight with `@Scheduled(cron = "0 0 0 * * *")`.
+
+## Swagger / OpenAPI
+
+After starting the app, open:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+## Cloud Vendor API
 
 Base path:
 
@@ -187,6 +254,13 @@ src/test/resources/application.yaml
 
 ## What This Demo Covers
 
+- API-key authentication with `X-API-Key`
+- Request validation with `@Valid`
+- Rate limiting and scheduled daily quota reset
+- Carrier retry rules by message type
+- Notification logs with carrier references
+- Paginated history endpoints with Spring Data `Pageable`
+- Swagger/OpenAPI UI
 - Basic CRUD REST endpoints
 - Controller, service, and repository layering
 - Spring Data JPA repository methods
@@ -198,13 +272,11 @@ src/test/resources/application.yaml
 
 ## Possible Improvements
 
-- Add request validation with `@Valid`, `@NotBlank`, and related annotations
 - Use DTOs instead of exposing the JPA entity directly
 - Return more precise HTTP status codes, such as `201 Created` for POST
 - Make response bodies consistent across all endpoints
 - Add a controller endpoint for searching by vendor name
 - Move database credentials to environment variables
-- Add Swagger/OpenAPI documentation
 - Add Docker Compose for MySQL
 - Add GitHub Actions for CI
 
